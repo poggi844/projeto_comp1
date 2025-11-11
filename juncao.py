@@ -1,4 +1,4 @@
-#RECONHECIMENTO DO USUÁRIO
+# RECONHECIMENTO DO USUÁRIO
 def cadastro(nome, senha):
     cadastros = open('usuarios.txt', 'a')
     cadastros.write(f'{nome};{senha}\n')
@@ -19,9 +19,9 @@ def login(nome, senha):
 
     return verificador
 
-########################################################################################################################
+#_____________________________________________________________________________________________________________
 
-#TABULEIRO
+# TABULEIRO
 def gerar_tabuleiro():
     tab = []
     for i in range(10):
@@ -30,10 +30,9 @@ def gerar_tabuleiro():
             linha.append(0)
         tab.append(linha)
     return tab
-
 main_tab = gerar_tabuleiro()
 
-
+# Esta função transforma um tabuleiro de números em um de imagens, para um entendimento visual
 def montar_main_tab(tab):
     tab_ = []
     for linhas in range(10):
@@ -60,6 +59,7 @@ for i in range(10):
     tab_0.append(linha)
 
 
+# Equivalente à função anterior, porém com um tabuleiro de chutes
 def montar_tab_chute(tab):
     tab_ = []
     for linhas in range(10):
@@ -73,17 +73,20 @@ def montar_tab_chute(tab):
         tab_.append(linha)
     return tab_
 
-#TAB OCULTO = tabuleiro de chutes VAZIO (-1) montado
+
+# TAB OCULTO = tabuleiro de chutes VAZIO (-1) montado
 tab_oculto = montar_tab_chute(tab_0)
 
+
+#Exibe o tabuleiro final com um cabeçalho
 def exibir_tab(tab):
     print('  A', '  B', ' C', ' D', ' E', '  F', ' G', ' H', ' I', ' J')
     for linhas in range(10):
         print(linhas, tab[linhas])
 
-########################################################################################################################
+#_____________________________________________________________________________________________________________
 
-#CARREGAMENTO DE JOGO
+# CARREGAMENTO DE JOGO
 from pathlib import Path
 import importlib.util
 import os
@@ -92,7 +95,8 @@ import copy
 #Montando o caminho absoluto da pasta de saves de forma idependente ao utilizador
 caminho = Path('saves').absolute()
 
-#Garantindo a existencia dos componentes do jogo
+
+# Garantindo a existencia dos componentes do jogo (diretório "saves" e "usuarios.txt")
 try:
     with open('usuarios.txt', 'r'):
         pass
@@ -101,10 +105,11 @@ except FileNotFoundError:
         pass
 
 os.makedirs('saves', exist_ok=True)
-##################################################
+
+#--------------------------------------------
 
 
-#Essa função é capaz de importar elementos de outros arquivos .py (utilizada para o carregamento de saves)
+# Essa função é capaz de importar elementos de outros arquivos .py (utilizada para o carregamento de saves)
 def importar_item(caminho, item):
     nome_usuario = os.path.splitext(os.path.basename(caminho))[0]
     spec = importlib.util.spec_from_file_location(nome_usuario, caminho)
@@ -114,32 +119,43 @@ def importar_item(caminho, item):
 
 
 
-#Fase 1 é a primeira etapa do jogo, onde o jogador distribui seus barcos pelo tabuleiro
+# Fase 1 é a primeira etapa do jogo, onde o jogador distribui seus barcos pelo tabuleiro
 def fase1():
-    # FASE 1
-    player_tab = []
-    _tab = main_tab.copy()
-    for n in range(2):
-        os.system('cls')
-        d2 = 0
-        c3 = 0
-        e4 = 0
-        p5 = 1
-        while d2 + c3 + e4 + p5 != 0:
-            os.system('cls')
+
+    player_tab = [] # Local onde irá ser armazenado os tabuleiros feitos pelos jogadores
+    _tab = main_tab.copy() # Tabuleiro em que o jogador irá montar o seu próprio em cima do tabuleiro base (main_tab)
+
+    for n in range(2): # O código se repete para os dois jogadores
+
+        os.system('cls') # Limpando o terminal para começar a fase 1
+
+
+        # Quantidades de cada tipo de barco.
+
+        d2 = 0  # Destróier
+        c3 = 0  # Cruzador
+        e4 = 0  # Encouraçado
+        p5 = 1  # Porta-aviões
+
+        while d2 + c3 + e4 + p5 != 0: # O turno do jogador roda até acabar os barcos
+
+            os.system('cls') 
+
+            # Cabeçalho da fase
             print('')
             print('=' * 50)
             print(f'                    Jogador {n + 1}\n')
             print('=' * 50)
             print('')
             montar_main_tab(_tab)
-
             print('')
             print('=' * 50)
             print(f'[1]  {d2}x Destróier:🔳⬜\n[2]  {c3}x Cruzador: ⬜🔳⬜\n'
                   f'[3]  {e4}x Encouraçado: ⬜🔳⬜⬜\n[4]  {p5}x Porta-aviões: ⬜⬜🔳⬜⬜')
             print('=' * 50)
-            while True:
+
+
+            while True: # Loop para corrigir possíveis erros de entrada
 
                 peca = input('\nSelecione um navio e sua orientação(v/h)...\n>').lower()
                 posicao = input('\nSelecione uma casa...\n>').lower()
@@ -166,11 +182,15 @@ def fase1():
                     else:
                         break
                 break
+            
 
+            # Coordenadas de entrada
             j = ord(posicao[0]) - 97
             i = int(posicao[1])
 
+            # Agora é a parte chata em que é verificado se a entrada de posicionamento do jogador é válida.
             match int(peca[0]):
+
                 case 1:
                     if d2 == 0:
                         print('\nVocê não tem mais navios desse tipo!\n')
@@ -315,12 +335,15 @@ def fase1():
                         print('\nEste lugar já está ocupado!\n')
                         continue
 
+        # Aqui o tabuleiro montado pelo jogador é adicionado à lista                     
         player_tab.append(_tab.copy())
-        _tab = gerar_tabuleiro()
-        os.system('cls')
+        _tab = gerar_tabuleiro() # Resetando o tabuleiro para o próximo jogador montar
+        os.system('cls') # Limpando o terminal para o próximo jogador
     return player_tab
 
 
+
+# Função usada para salvar um jogo no meio, usando os devidos parâmetros necessários
 def salvar_jogo(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno):
     save_usuario = fr'{str(caminho)}\{nome}.py'
     save = open(save_usuario, 'w')
@@ -332,25 +355,36 @@ def salvar_jogo(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno):
     save.close()
 
 
-#A fase 2 é a segunda etapa do jogo, onde os jogadores tentam adivinhar onde o navio inimigo está
+# A fase 2 é a segunda etapa do jogo, onde os jogadores tentam adivinhar onde o navio inimigo está
 def fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno):
-    os.system('cls')
-    # Parametros de ação
-    salvamento = 0
-    j1 = 0
-    j2 = 0
+
+    os.system('cls') # Limpando o terminal para prosseguir para fase 2
+
+    # A ideia do turno é que os turnos impares são do jogador 1, enquanto os turnos pares são do jogador 2
+    # Se o jogador acertar o barco, o turno não se altera pois ele joga novamente
 
     while True:
-        if turno % 2 == 1:
+        if turno % 2 == 1: # Jogador 1
+
+            os.system('cls') # Limpando o terminal
+
+            # Cabeçalho
             print('')
             print('=' * 50)
             print(f'                    Jogador 1\n')
             print('=' * 50)
             continuar = int(input('[1] ATACAR\n[2] SALVAR JOGO E SAIR\n> '))
             print('=' * 50)
+
+            # O jogador tem a opção de atacar (1) uma casa ou salvar o jogo (2)
+
             match continuar:
-                case 1:
-                    exibir_tab(montar_tab_chute(tab_de_jogo2))
+
+                case 1: # ATACAR
+
+                    exibir_tab(montar_tab_chute(tab_de_jogo2)) # Mostra o tabuleiro de chute
+
+                    # Entrada das coordenadas e validação das mesmas
                     while True:
                         print('')
                         ij = input('Insira as coordenadas para o ataque:\n> ').upper()
@@ -362,8 +396,12 @@ def fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno):
                                 continue
                         else:
                             break
+
+                    # Coordenadas de entrada
                     j = ord(ij[0].lower()) - 97
                     i = int(ij[1])
+
+                    # Condicionais para a verificação de acerto
                     if tab2[i][j] == 0:
                         tab_de_jogo2[i][j] = 0
                         exibir_tab(montar_tab_chute(tab_de_jogo2))
@@ -388,12 +426,19 @@ def fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno):
                         print('=' * 50)
                         input(' ')
                         tab2[i][j] = -1
-                case 2:
+
+                case 2: #SALVAR E SAIR
+
                     salvar_jogo(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno)
-                    salvamento = 1
-                    break
+                    break 
+
+
+        # Essa parte do código é equivalente a de cima, porém com o jogador 2
 
         elif turno % 2 == 0:
+
+            os.system('cls')
+
             print('')
             print('=' * 50)
             print(f'                    Jogador 2\n')
@@ -443,20 +488,31 @@ def fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno):
                         tab1[i][j] = -1
                 case 2:
                     salvar_jogo(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno)
-                    salvamento = 1
+
                     break
 
+
+        # Essa parte é bem interessante:
+        #   Basicamente, a cada turno, eu verifico se ainda há alguma parte de barco não destruida em ambos os tabuleiros.
+
+        #   Para isso, o primeiro for seleciona cada linha horizontal do tabuleiro, enquanto o segundo verifica cada casa
+        # dessa linha. As condicionais verificam se o valor dessa casa é 1 ou 2 (valores que indicam um pedaço de barco não destruido).
+        # Se o valor de qualquer casa for 1 ou 2, o valor do parâmetro muda de 0 para 1, indicando que ainda há pedaços de barcos inteiros.
+
+        
         parametro1 = 0
         parametro2 = 0
+
         for i in range(10):
             for j in range(10):
                 if tab1[i][j] == 1 or tab1[i][j] == 2:
-                    parametro1 += 1
+                    parametro1 = 1
 
                 if tab2[i][j] == 1 or tab2[i][j] == 2:
-                    parametro2 += 1
+                    parametro2 = 1
 
-        if parametro1 == 0:
+        # Indica que o Jogador 2 venceu
+        if parametro1 != 1:
             print('=' * 50)
             print('           🏆 O JOGADOR 2 VENCEU!!! 🏆\n')
             print('                   Jogador 2 🥇')
@@ -472,7 +528,8 @@ def fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno):
             j2 = 1
             break
 
-        if parametro2 == 0:
+        # Indica que o Jogador 1 venceu
+        if parametro2 != 1:
             print('=' * 50)
             print('           🏆 O JOGADOR 1 VENCEU!!! 🏆\n')
             print('                   Jogador 1 🥇')
@@ -489,6 +546,7 @@ def fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno):
             break
 
 
+# Essa função é utilizada para criar um novo jogo, no modo JxJ
 def JvsJ(nome):
     player_tab = fase1()
     tab1 = player_tab[0].copy()
@@ -496,7 +554,7 @@ def JvsJ(nome):
     fase2(nome, tab1, tab2, copy.deepcopy(tab_0), copy.deepcopy(tab_0), 1)
     menu_login(nome)
 
-#importa os elementos necessários para a continuação do jogo salvo do arquivo .py correspondente de cada jogador.
+# Importa os elementos necessários para a continuação do jogo salvo do arquivo .py correspondente de cada jogador.
 def carregar_jogo(nome):
     if Path(fr'{str(caminho)}\{nome}.py').exists():
         tab1 = importar_item(fr'{str(caminho)}\{nome}.py', 'tab1')
@@ -507,19 +565,31 @@ def carregar_jogo(nome):
         fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno)
     else:
         print('Não há nenhum jogo salvo!')
+        input('\n\nPressione qualquer tecla para voltar ao MENU...\n')
+        os.system('cls')
         return -1
 
-########################################################################################################################
+#_____________________________________________________________________________________________________________
+
+# MENU PRINCIPAL E DE LOGIN
+
+
 from rich.console import Console
 from rich.markdown import Markdown
 
+# Arquivo com instruções de jogo
 with open('README.md', 'r', encoding='utf-8') as f:
     readme = f.read()
 
-#MENU PRINCIPAL E DE LOGIN
+
+# Menu depois de feito o login
 def menu_login(nome):
-    os.system('cls')
+
+    os.system('cls')  # Limpa o terminal a cada vez que o menu é acessado
+
     while True:
+
+        # Cabeçalho do menu
         print('')
         print('=' * 30)
         print(f'     Seja Bem-Vindo, {nome}!\n')
@@ -527,9 +597,14 @@ def menu_login(nome):
         print('1 - Novo Jogo\n2 - Carregar Jogo\n3 - Logout')
         print('=' * 30)
         escolha = int(input('> '))
+
         match escolha:
-            case 1:
-                os.system('cls')
+
+            case 1:  # Novo Jogo
+
+                os.system('cls') 
+
+                # Cabeçalho para a seleção do modo de jogo
                 print('')
                 print('=' * 30)
                 print(f'  Selecione o Modo de Jogo!\n')
@@ -537,39 +612,52 @@ def menu_login(nome):
                 print('1 - Jogador vs. Máquina\n2 - Jogador vs. Jogador\n3 - Voltar')
                 print('=' * 30)
                 escolha_ = int(input('> '))
+
                 match escolha_:
+
                     case 1:
-                        ...
+                        ... # A ser adicionado
                     case 2:
-                        JvsJ(nome)
+                        JvsJ(nome) # Função para criar um novo jogo
                     case 3:
                         continue
-            case 2:
+
+            case 2:  # Carregar Jogo
                 carregar_jogo(nome)
-                input('\n\nPressione qualquer tecla para voltar ao MENU...\n')
-                os.system('cls')
-            case 3:
+
+            case 3:  # Voltar ao menu principal
                 main_menu()
                 break
 
+
+
+# Menu principal de entrada
 def main_menu():
-    os.system('cls')
+
+    os.system('cls') # Limpa o terminal a cada vez que o menu é acessado
+
     while True:
+
+        # Cabeçalho do menu
         print('=' * 30)
         print('     💣 Batalha Naval 🛳️')
         print('=' * 30)
         print('1 - Fazer Login\n2 - Cadastrar Usuário\n3 - Como Jogar?\n4 - Sair')
         print('=' * 30)
         escolha = int(input('> '))
+
+        # Seleção de opções
         match escolha:
-            case 1:
+
+            case 1:  # Fazer Login
                 nome = input('\nInsira o nome de usuário: ')
                 senha = input('Digite sua senha: ')
                 if login(nome,senha):
                     menu_login(nome)
                 else:
                     continue
-            case 2:
+
+            case 2:  # Fazer Cadastro
                 nome = input('\nInsira o nome de usuário: ')
                 senha = input('Escolha uma senha: ')
                 cadastros = open('usuarios.txt', 'r')
@@ -579,7 +667,8 @@ def main_menu():
                     cadastro(nome,senha)
                 cadastros.close()
                 continue
-            case 3:
+
+            case 3:  # Mostrar instruções de jogo
                 os.system('cls')
                 Console().print(Markdown(readme))
                 input('\n\nPressione qualquer tecla para voltar ao MENU...\n')
@@ -590,4 +679,6 @@ def main_menu():
     exit()
 
 
+
+# Executando o programa
 main_menu()

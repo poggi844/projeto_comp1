@@ -14,7 +14,7 @@
     
                          
 - ### PRIMEIRA ETAPA
-  A primeira etapa do jogo consiste em posicionar os seus barcos no tabuleiro. Primeiramente, basta escolher o tipo do barco e sua orientação, que irá ser um input do tipo **[NÚMERO][ORIENTAÇÃO]**, onde número se refere ao tipo do barco, e a orientação se refere a como seu barco se orientará no espaço, *"H"* para horizontal e *"v"* para vertical. Em seguida, é necessário identificar o centro do barco destacado e escolher sua posição no tabuleiro atravez de um input
+  A primeira etapa do jogo consiste em posicionar os seus barcos no tabuleiro. Primeiramente, basta escolher o tipo do barco e sua orientação, que irá ser um input do tipo **[NÚMERO][ORIENTAÇÃO]**, onde número se refere ao tipo do barco, e a orientação se refere a como seu barco se orientará no espaço, *"H"* para horizontal e *"V"* para vertical. Em seguida, é necessário identificar o centro do barco destacado e escolher sua posição no tabuleiro atravez de um input
   do tipo **[LETRA][NÚMERO]** ou **[NÚMERO][LETRA]**.
 
 - ### SEGUNDA ETAPA

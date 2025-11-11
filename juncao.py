@@ -499,7 +499,11 @@ def carregar_jogo(nome):
         return -1
 
 ########################################################################################################################
+from rich.console import Console
+from rich.markdown import Markdown
 
+with open('README.md', 'r', encoding='utf-8') as f:
+    readme = f.read()
 
 #MENU PRINCIPAL E DE LOGIN
 def menu_login(nome):
@@ -542,7 +546,7 @@ def main_menu():
         print('=' * 30)
         print('     💣 Batalha Naval 🛳️')
         print('=' * 30)
-        print('1 - Fazer Login\n2 - Cadastrar Usuário\n3 - Sair')
+        print('1 - Fazer Login\n2 - Cadastrar Usuário\n3 - Como Jogar?\n4 - Sair')
         print('=' * 30)
         escolha = int(input('> '))
         match escolha:
@@ -570,6 +574,11 @@ def main_menu():
                 cadastros.close()
                 continue
             case 3:
+                os.system('cls')
+                Console().print(Markdown(readme))
+                input('\n\nPressione qualquer tecla para voltar ao MENU...\n')
+                os.system('cls')
+            case 4:
                 break
     
     exit()

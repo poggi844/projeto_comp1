@@ -91,7 +91,18 @@ import copy
 
 #Montando o caminho absoluto da pasta de saves de forma idependente ao utilizador
 caminho = Path('saves').absolute()
+
+#Garantindo a existencia dos componentes do jogo
+try:
+    with open('usuarios.txt', 'r'):
+        pass
+except FileNotFoundError:
+    with open('usuarios.txt', 'a'):
+        pass
+
 os.makedirs('saves', exist_ok=True)
+##################################################
+
 
 #Essa função é capaz de importar elementos de outros arquivos .py (utilizada para o carregamento de saves)
 def importar_item(caminho, item):
@@ -129,31 +140,31 @@ def fase1():
                   f'[3]  {e4}x Encouraçado: ⬜🔳⬜⬜\n[4]  {p5}x Porta-aviões: ⬜⬜🔳⬜⬜')
             print('=' * 50)
             while True:
+
                 peca = input('\nSelecione um navio e sua orientação(v/h)...\n>').lower()
                 posicao = input('\nSelecione uma casa...\n>').lower()
-                if len(peca) != 2 or not (peca[0].isdigit()) or type(peca) != str:
+
+                if len(peca) != 2 or not (peca[0].isdigit()):
                     print('Entrada Inválida!')
-                    print(1)
                     continue
+
                 elif not(1 <= int(peca[0]) <= 4) or (peca[1] != 'h' and peca[1] != 'v'):
                     print('Entrada Inválida!')
-                    print(2)
                     continue
 
                 if posicao[1].isdigit():
                     if not(0 <= int(posicao[1]) <= 9) or not('A' <= posicao[0].upper() <= 'J'):
                         print('Entrada Inválida!')
-                        print(3)
                         continue
+
                 elif posicao[0].isdigit():
                     posicao = f'{posicao[1]}{posicao[0]}'
                     if not(0 <= posicao[1] <= 9) or not('A' <= posicao[0] <= 'J'):
                         print('Entrada Inválida!')
-                        print(4)
                         continue
+
                     else:
                         break
-
                 break
 
             j = ord(posicao[0]) - 97
@@ -342,7 +353,7 @@ def fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno):
                     exibir_tab(montar_tab_chute(tab_de_jogo2))
                     while True:
                         print('')
-                        ij = input('Insira as coordenadas para o ataque:\n> ')
+                        ij = input('Insira as coordenadas para o ataque:\n> ').upper()
                         print('')
                         if ij[0].isdigit():
                             ij = f'{ij[1]}{ij[0]}'
@@ -535,6 +546,7 @@ def menu_login(nome):
                         continue
             case 2:
                 carregar_jogo(nome)
+                input('\n\nPressione qualquer tecla para voltar ao MENU...\n')
                 os.system('cls')
             case 3:
                 main_menu()
@@ -558,12 +570,6 @@ def main_menu():
                 else:
                     continue
             case 2:
-                try:
-                    with open('usuarios.txt', 'r'):
-                        pass
-                except FileNotFoundError:
-                    with open('usuarios.txt', 'a'):
-                        pass
                 nome = input('\nInsira o nome de usuário: ')
                 senha = input('Escolha uma senha: ')
                 cadastros = open('usuarios.txt', 'r')

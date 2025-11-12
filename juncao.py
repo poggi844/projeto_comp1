@@ -107,7 +107,7 @@ except FileNotFoundError:
 os.makedirs('saves', exist_ok=True)
 
 #--------------------------------------------
-
+import random
 
 # Essa função é capaz de importar elementos de outros arquivos .py (utilizada para o carregamento de saves)
 def importar_item(caminho, item):
@@ -122,13 +122,12 @@ def importar_item(caminho, item):
 # Fase 1 é a primeira etapa do jogo, onde o jogador distribui seus barcos pelo tabuleiro
 def fase1():
 
-    player_tab = [] # Local onde irá ser armazenado os tabuleiros feitos pelos jogadores
-    _tab = main_tab.copy() # Tabuleiro em que o jogador irá montar o seu próprio em cima do tabuleiro base (main_tab)
+    tabs_montados = [] # Local onde irá ser armazenado os tabuleiros feitos pelos jogadores
+    tab_montado = main_tab.copy() # Tabuleiro em que o jogador irá montar o seu próprio em cima do tabuleiro base (main_tab)
 
-    for n in range(2): # O código se repete para os dois jogadores
+    for jogador in range(2): # O código se repete para os dois jogadores
 
         os.system('cls') # Limpando o terminal para começar a fase 1
-
 
         # Quantidades de cada tipo de barco.
 
@@ -142,204 +141,224 @@ def fase1():
             os.system('cls') 
 
             # Cabeçalho da fase
+            #-----------------------------------------------------------------------------------
             print('')
             print('=' * 50)
-            print(f'                    Jogador {n + 1}\n')
+            print(f'                    Jogador {jogador + 1}\n')
             print('=' * 50)
             print('')
-            montar_main_tab(_tab)
+            montar_main_tab(tab_montado)
             print('')
             print('=' * 50)
             print(f'[1]  {d2}x Destróier:🔳⬜\n[2]  {c3}x Cruzador: ⬜🔳⬜\n'
                   f'[3]  {e4}x Encouraçado: ⬜🔳⬜⬜\n[4]  {p5}x Porta-aviões: ⬜⬜🔳⬜⬜')
             print('=' * 50)
+            #------------------------------------------------------------------------------------
 
 
             while True: # Loop para corrigir possíveis erros de entrada
 
-                peca = input('\nSelecione um navio e sua orientação(v/h)...\n>').lower()
-                posicao = input('\nSelecione uma casa...\n>').lower()
+                peca = input('\nSelecione um NAVIO [1, 2, 3 ou 4] e sua ORIENTAÇÃO [H ou V]...\n>').lower().replace(' ', '')
+                posicao = input('\nSelecione uma COORDENADA...\n>').lower().replace(' ', '')
 
-                if len(peca) != 2 or not (peca[0].isdigit()):
-                    print('Entrada Inválida!')
-                    continue
+                # Verificações da peça
+                if peca[1].isdigit():
+                    peca = f'{peca[1]}{peca[0]}'
 
-                elif not(1 <= int(peca[0]) <= 4) or (peca[1] != 'h' and peca[1] != 'v'):
-                    print('Entrada Inválida!')
-                    continue
-
-                if posicao[1].isdigit():
-                    if not(0 <= int(posicao[1]) <= 9) or not('A' <= posicao[0].upper() <= 'J'):
-                        print('Entrada Inválida!')
-                        continue
-
-                elif posicao[0].isdigit():
+                if len(peca) == 2:
+                    if 1 <= int(peca[0]) <= 4 and (peca[1] == 'h' or peca[1] == 'v'):
+                        verificacao_peca = True
+                else:
+                    verificacao_peca = False
+                
+                # Verificações da posição
+                if posicao[0].isdigit():
                     posicao = f'{posicao[1]}{posicao[0]}'
-                    if not(0 <= posicao[1] <= 9) or not('A' <= posicao[0] <= 'J'):
-                        print('Entrada Inválida!')
-                        continue
+                
+                if len(posicao) == 2:
+                    if 'A' <= posicao[0].upper() <= 'J' and 0 <= int(posicao[1]) <= 9:
+                        verificacao_posicao = True
+                else:
+                    verificacao_posicao = False
 
-                    else:
-                        break
-                break
-            
+                
+                # Validação de entradas
+                if verificacao_peca and verificacao_posicao:
+                    break
+                else:
+                    print('\nEntrada(s) inválida(s)! Se atente a forma devida.\n')
+                    input('Pressione qualquer tecla para inserir novas entradas... ')
+                    continue
 
-            # Coordenadas de entrada
+
+            # Coordenadas, peça e orientação de entrada
             j = ord(posicao[0]) - 97
             i = int(posicao[1])
 
-            # Agora é a parte chata em que é verificado se a entrada de posicionamento do jogador é válida.
-            match int(peca[0]):
+            barco = int(peca[0])
 
+            if peca[1] == 'h':
+                direcao = 1
+            elif peca[1] == 'v':
+                direcao = 2
+
+
+            # Agora é a parte chata em que é verificado se a entrada de posicionamento do jogador é válida.
+            match barco:
                 case 1:
                     if d2 == 0:
-                        print('\nVocê não tem mais navios desse tipo!\n')
-                        continue
-                    elif _tab[i][j] != 0 or _tab[i][j] != 0:
-                        print('\nEste lugar já está ocupado!\n')
+                        print('Você não tem mais NAVIOS desse tipo.')
+                        input('Pressione qualquer tecla para inserir novas entradas... ')
                         continue
 
-                    elif peca[1] == 'h' and _tab[i][j + 1] == 0:
+                    try:
+                        if direcao == 1:
+                            if (tab_montado[i][j], tab_montado[i][j+1]) == (0,0):
 
-                        if not (0 <= j < 9):
-                            print('\nO navio não cabe no local, tente outra casa ou outra orientação!\n')
-                            continue
+                                tab_montado[i][j+1] = 1
+                                tab_montado[i][j] = 2
+                                d2 -= 1
+                        
+                        elif direcao == 2:
+                            if (tab_montado[i][j], tab_montado[i+1][j]) == (0,0):
+
+                                tab_montado[i+1][j] = 1
+                                tab_montado[i][j] = 2
+                                d2 -= 1
+
                         else:
-                            _tab[i][j + 1] = 1
-                            _tab[i][j] = 2
-                            d2 -= 1
-
-                    elif peca[1] == 'v' and _tab[i + 1][j] == 0:
-
-                        if not (0 <= i < 9):
-                            print('\nO navio não cabe no local, tente outra casa ou outra orientação!\n')
-                            continue
-                        else:
-                            _tab[i + 1][j] = 1
-                            _tab[i][j] = 2
-                            d2 -= 1
-
-                    else:
-                        print('\nEste lugar já está ocupado!\n')
+                            print('\nO NAVIO não cabe na COORDENADA selecionada.\n')
+                            input('Pressione qualquer tecla para inserir novas entradas... ')
+                            
                         continue
+
+                    except:
+                        print('\nO NAVIO não cabe na COORDENADA selecionada.\n')
+                        input('Pressione qualquer tecla para inserir novas entradas... ')
+                        continue
+
 
                 case 2:
                     if c3 == 0:
-                        print('\nVocê não tem mais navios desse tipo!\n')
+                        print('Você não tem mais NAVIOS desse tipo.')
+                        input('Pressione qualquer tecla para inserir novas entradas... ')
                         continue
-                    elif _tab[i][j] != 0 or _tab[i][j] != 0:
-                        print('\nEste lugar já está ocupado!\n')
-                        continue
+                    
+                    try:
+                        if direcao == 1:
+                            if (tab_montado[i][j-1], tab_montado[i][j], tab_montado[i][j+1]) == (0,0,0):
 
-                    elif peca[1] == 'h' and _tab[i][j + 1] == 0 and _tab[i][j - 1] == 0:
 
-                        if not (0 < j < 9):
-                            print('\nO navio não cabe no local, tente outra casa ou outra orientação!\n')
-                            continue
+                                tab_montado[i][j-1] = 1
+                                tab_montado[i][j] = 2
+                                tab_montado[i][j+1] = 1
+                                c3 -= 1
+                    
+                        elif direcao == 2:
+                            if (tab_montado[i-1][j], tab_montado[i][j], tab_montado[i+1][j]) == (0,0,0):
+
+                                tab_montado[i-1][j] = 1
+                                tab_montado[i][j] = 2
+                                tab_montado[i+1][j] = 1
+                                c3 -= 1
+
                         else:
-                            _tab[i][j + 1] = 1
-                            _tab[i][j - 1] = 1
-                            _tab[i][j] = 2
-                            c3 -= 1
-
-                    elif peca[1] == 'v' and _tab[i + 1][j] == 0 and _tab[i - 1][j] == 0:
-
-                        if not (0 < i < 9):
-                            print('\nO navio não cabe no local, tente outra casa ou outra orientação!\n')
-                            continue
-                        else:
-                            _tab[i + 1][j] = 1
-                            _tab[i - 1][j] = 1
-                            _tab[i][j] = 2
-                            c3 -= 1
-
-                    else:
-                        print('\nEste lugar já está ocupado!\n')
+                            print('\nO NAVIO não cabe na COORDENADA selecionada.\n')
+                            input('Pressione qualquer tecla para inserir novas entradas... ')
+                            
                         continue
+
+                    except:
+                        print('\nO NAVIO não cabe na COORDENADA selecionada.\n')
+                        input('Pressione qualquer tecla para inserir novas entradas... ')
+                        continue
+                        
 
                 case 3:
-
                     if e4 == 0:
-                        print('\nVocê não tem mais navios desse tipo!\n')
-                        continue
-                    elif _tab[i][j] != 0 or _tab[i][j] != 0:
-                        print('\nEste lugar já está ocupado!\n')
+                        print('Você não tem mais NAVIOS desse tipo.')
+                        input('Pressione qualquer tecla para inserir novas entradas... ')
                         continue
 
-                    elif peca[1] == 'h' and _tab[i][j + 1] == 0 and _tab[i][j + 2] == 0 and _tab[i][j - 1] == 0:
+                    try: 
+                        if direcao == 1:
+                            if (tab_montado[i][j-1], tab_montado[i][j], tab_montado[i][j+1], tab_montado[i][j+2]) == (0,0,0,0):
 
-                        if not (0 < j < 8):
-                            print('\nO navio não cabe no local, tente outra casa ou outra orientação!\n')
-                            continue
+
+                                tab_montado[i][j-1] = 1
+                                tab_montado[i][j] = 2
+                                tab_montado[i][j+1] = 1
+                                tab_montado[i][j+2] = 1
+                                e4 -= 1
+                        
+                        elif direcao == 2:
+                            if (tab_montado[i-1][j], tab_montado[i][j], tab_montado[i+1][j], tab_montado[i+2][j]) == (0,0,0,0):
+
+                                tab_montado[i-1][j] = 1
+                                tab_montado[i][j] = 2
+                                tab_montado[i+1][j] = 1
+                                tab_montado[i+2][j]
+                                e4 -= 1
+
                         else:
-                            _tab[i][j + 1] = 1
-                            _tab[i][j + 2] = 1
-                            _tab[i][j - 1] = 1
-                            _tab[i][j] = 2
-                            e4 -= 1
-
-                    elif peca[1] == 'v' and _tab[i + 1][j] == 0 and _tab[i + 2][j] == 0 and _tab[i - 1][j] == 0:
-
-                        if not (0 < i < 8):
-                            print('\nO navio não cabe no local, tente outra casa ou outra orientação!\n')
-                            continue
-                        else:
-                            _tab[i + 1][j] = 1
-                            _tab[i + 2][j] = 1
-                            _tab[i - 1][j] = 1
-                            _tab[i][j] = 2
-                            e4 -= 1
-
-                    else:
-                        print('\nEste lugar já está ocupado!\n')
+                            print('\nO NAVIO não cabe na COORDENADA selecionada.\n')
+                            input('Pressione qualquer tecla para inserir novas entradas... ')
+                            
                         continue
+
+                    except:
+                        print('\nO NAVIO não cabe na COORDENADA selecionada.\n')
+                        input('Pressione qualquer tecla para inserir novas entradas... ')
+                        continue
+
+
 
                 case 4:
-
                     if p5 == 0:
-                        print('\nVocê não tem mais navios desse tipo!\n')
+                        print('Você não tem mais NAVIOS desse tipo.')
+                        input('Pressione qualquer tecla para inserir novas entradas... ')
                         continue
-                    elif _tab[i][j] != 0 or _tab[i][j] != 0:
-                        print('\nEste lugar já está ocupado!\n')
-                        continue
+                    
+                    try:
+                        if direcao == 1:
+                            if (tab_montado[i][j-2], tab_montado[i][j-1], tab_montado[i][j], tab_montado[i][j+1], tab_montado[i][j+2]) == (0,0,0,0,0):
 
-                    elif peca[1] == 'h' and _tab[i][j + 1] == 0 and _tab[i][j + 2] == 0 and _tab[i][j - 1] == 0 \
-                            and _tab[i][j - 2] == 0:
+                                tab_montado[i][j-2] = 1
+                                tab_montado[i][j-1] = 1
+                                tab_montado[i][j] = 2
+                                tab_montado[i][j+1] = 1
+                                tab_montado[i][j+2] = 1
+                                p5 -= 1
+                        
+                        elif direcao == 2:
+                            if (tab_montado[i-2][j], tab_montado[i-1][j], tab_montado[i][j], tab_montado[i+1][j], tab_montado[i+2][j]) == (0,0,0,0):
 
-                        if not (1 < j < 8):
-                            print('\nO navio não cabe no local, tente outra casa ou outra orientação!\n')
-                            continue
+                                tab_montado[i-2][j] = 1
+                                tab_montado[i-1][j] = 1
+                                tab_montado[i][j] = 2
+                                tab_montado[i+1][j] = 1
+                                tab_montado[i+2][j]
+                                p5 -= 1
+
                         else:
-                            _tab[i][j + 1] = 1
-                            _tab[i][j + 2] = 1
-                            _tab[i][j - 1] = 1
-                            _tab[i][j - 2] = 1
-                            _tab[i][j] = 2
-                            p5 -= 1
-
-                    elif peca[1] == 'v' and _tab[i + 1][j] == 0 and _tab[i + 2][j] == 0 and _tab[i - 1][j] == 0 \
-                            and _tab[i - 2][j] == 0:
-
-                        if not (1 < i < 8):
-                            print('\nO navio não cabe no local, tente outra casa ou outra orientação!\n')
-                            continue
-                        else:
-                            _tab[i + 1][j] = 1
-                            _tab[i + 2][j] = 1
-                            _tab[i - 1][j] = 1
-                            _tab[i - 2][j] = 1
-                            _tab[i][j] = 2
-                            p5 -= 1
-
-                    else:
-                        print('\nEste lugar já está ocupado!\n')
+                            print('\nO NAVIO não cabe na COORDENADA selecionada.\n')
+                            input('Pressione qualquer tecla para inserir novas entradas... ')
+                        
                         continue
+
+                    except:
+                        print('\nO NAVIO não cabe na COORDENADA selecionada.\n')
+                        input('Pressione qualquer tecla para inserir novas entradas... ')
+                        continue
+
 
         # Aqui o tabuleiro montado pelo jogador é adicionado à lista                     
-        player_tab.append(_tab.copy())
-        _tab = gerar_tabuleiro() # Resetando o tabuleiro para o próximo jogador montar
+        tabs_montados.append(tab_montado.copy())
+        tab_montado = gerar_tabuleiro() # Resetando o tabuleiro para o próximo jogador montar
+
         os.system('cls') # Limpando o terminal para o próximo jogador
-    return player_tab
+
+    return tabs_montados
 
 
 
@@ -680,5 +699,146 @@ def main_menu():
 
 
 
-# Executando o programa
-main_menu()
+
+
+def ia_fase1():
+
+    mach_tab = main_tab.copy()
+
+    d2 = 4  
+    c3 = 3  
+    e4 = 2 
+    p5 = 1  
+
+    while d2 + c3 + e4 + p5 != 0:
+
+        
+        barco = random.randint(2,5)
+        direcao = random.randint(1,2) # 1 = H e 2 = V
+
+        match barco:
+            case 2:
+                if direcao == 1:
+                    i = random.randint(0,9)
+                    j = random.randint(0,8)
+                elif direcao == 2:
+                    i = random.randint(0,8)
+                    j = random.randint(0,9)                    
+            case 3:
+                if direcao == 1:
+                    i = random.randint(0,9)
+                    j = random.randint(1,8)
+                elif direcao == 2:
+                    i = random.randint(1,8)
+                    j = random.randint(0,9)
+            case 4:
+                if direcao == 1:
+                    i = random.randint(0,9)
+                    j = random.randint(1,7)
+                elif direcao == 2:
+                    i = random.randint(1,7)
+                    j = random.randint(0,9)
+            case 5:
+                if direcao == 1:
+                    i = random.randint(0,9)
+                    j = random.randint(2,7)
+                elif direcao == 2:
+                    i = random.randint(2,7)
+                    j = random.randint(0,9)
+
+
+        #print(barco, direcao, i, j)
+        match barco:
+            case 2:
+                if d2 == 0:
+                    continue
+
+                if direcao == 1:
+                    if (mach_tab[i][j], mach_tab[i][j+1]) == (0,0):
+
+                        mach_tab[i][j+1] = 1
+                        mach_tab[i][j] = 2
+                        d2 -= 1
+                
+                elif direcao == 2:
+                    if (mach_tab[i][j], mach_tab[i+1][j]) == (0,0):
+
+                        mach_tab[i+1][j] = 1
+                        mach_tab[i][j] = 2
+                        d2 -= 1
+
+            case 3:
+                if c3 == 0:
+                    continue
+                
+                if direcao == 1:
+                    if (mach_tab[i][j-1], mach_tab[i][j], mach_tab[i][j+1]) == (0,0,0):
+
+
+                        mach_tab[i][j-1] = 1
+                        mach_tab[i][j] = 2
+                        mach_tab[i][j+1] = 1
+                        c3 -= 1
+                
+                elif direcao == 2:
+                    if (mach_tab[i-1][j], mach_tab[i][j], mach_tab[i+1][j]) == (0,0,0):
+
+                        mach_tab[i-1][j] = 1
+                        mach_tab[i][j] = 2
+                        mach_tab[i+1][j] = 1
+                        c3 -= 1
+
+
+            case 4:
+                if e4 == 0:
+                    continue
+
+                if direcao == 1:
+                    if (mach_tab[i][j-1], mach_tab[i][j], mach_tab[i][j+1], mach_tab[i][j+2]) == (0,0,0,0):
+
+
+                        mach_tab[i][j-1] = 1
+                        mach_tab[i][j] = 2
+                        mach_tab[i][j+1] = 1
+                        mach_tab[i][j+2] = 1
+                        e4 -= 1
+                
+                elif direcao == 2:
+                    if (mach_tab[i-1][j], mach_tab[i][j], mach_tab[i+1][j], mach_tab[i+2][j]) == (0,0,0,0):
+
+                        mach_tab[i-1][j] = 1
+                        mach_tab[i][j] = 2
+                        mach_tab[i+1][j] = 1
+                        mach_tab[i+2][j]
+                        e4 -= 1
+
+
+            case 5:
+                if p5 == 0:
+                    continue
+                
+                if direcao == 1:
+                    if (mach_tab[i][j-2], mach_tab[i][j-1], mach_tab[i][j], mach_tab[i][j+1], mach_tab[i][j+2]) == (0,0,0,0,0):
+
+                        mach_tab[i][j-2] = 1
+                        mach_tab[i][j-1] = 1
+                        mach_tab[i][j] = 2
+                        mach_tab[i][j+1] = 1
+                        mach_tab[i][j+2] = 1
+                        p5 -= 1
+                
+                elif direcao == 2:
+                    if (mach_tab[i-2][j], mach_tab[i-1][j], mach_tab[i][j], mach_tab[i+1][j], mach_tab[i+2][j]) == (0,0,0,0):
+
+                        mach_tab[i-2][j] = 1
+                        mach_tab[i-1][j] = 1
+                        mach_tab[i][j] = 2
+                        mach_tab[i+1][j] = 1
+                        mach_tab[i+2][j]
+                        p5 -= 1
+                    
+                
+    return mach_tab
+
+def ia_fase2():
+    ...

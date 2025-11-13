@@ -1,4 +1,5 @@
 # Projeto Final de Computação 1
+### Thiago Poggi
 
 ## Tema: Jogo de Batalha Naval
 

@@ -39,16 +39,18 @@ def fase1():
 
             while True: # Loop para corrigir possíveis erros de entrada
 
-                peca = input('\nSelecione um NAVIO [1, 2, 3 ou 4] e sua ORIENTAÇÃO [H ou V]...\n>').lower().replace(' ', '')
-                posicao = input('\nSelecione uma COORDENADA...\n>').lower().replace(' ', '')
+                peca = input('\nSelecione um NAVIO [1, 2, 3 ou 4] e sua ORIENTAÇÃO [H ou V]...\n>').upper().replace(' ', '')
+                posicao = input('\nSelecione uma COORDENADA...\n>').upper().replace(' ', '')
 
                 # Verificações da peça
                 if peca[1].isdigit():
                     peca = f'{peca[1]}{peca[0]}'
 
                 if len(peca) == 2:
-                    if 1 <= int(peca[0]) <= 4 and (peca[1] == 'h' or peca[1] == 'v'):
+                    if 1 <= int(peca[0]) <= 4 and (peca[1] == 'H' or peca[1] == 'V'):
                         verificacao_peca = True
+                    else:
+                        verificacao_peca = False
                 else:
                     verificacao_peca = False
                 
@@ -57,8 +59,10 @@ def fase1():
                     posicao = f'{posicao[1]}{posicao[0]}'
                 
                 if len(posicao) == 2:
-                    if 'A' <= posicao[0].upper() <= 'J' and 0 <= int(posicao[1]) <= 9:
+                    if 'A' <= posicao[0] <= 'J' and 0 <= int(posicao[1]) <= 9:
                         verificacao_posicao = True
+                    else:
+                        verificacao_peca = False
                 else:
                     verificacao_posicao = False
 
@@ -73,14 +77,14 @@ def fase1():
 
 
             # Coordenadas, peça e orientação de entrada
-            j = ord(posicao[0]) - 97
+            j = ord(posicao[0]) - 65
             i = int(posicao[1])
 
             barco = int(peca[0])
 
-            if peca[1] == 'h':
+            if peca[1] == 'H':
                 direcao = 1
-            elif peca[1] == 'v':
+            elif peca[1] == 'V':
                 direcao = 2
 
 

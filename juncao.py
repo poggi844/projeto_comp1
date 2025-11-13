@@ -14,7 +14,7 @@ def login(nome, senha):
         verificador = True
     else:
         verificador = False
-        print('O usuário não pode ser encontrado ou a senha está incorreta. Porfavor tente novamente.')
+        input('\nO usuário não pode ser encontrado ou a senha está incorreta. Porfavor tente novamente. ')
     cadastros.close()
 
     return verificador
@@ -88,9 +88,8 @@ def exibir_tab(tab):
 
 # CARREGAMENTO DE JOGO
 from pathlib import Path
-import importlib.util
-import os
-import copy
+import importlib.util, os, copy, random
+
 
 #Montando o caminho absoluto da pasta de saves de forma idependente ao utilizador
 caminho = Path('saves').absolute()
@@ -105,9 +104,7 @@ except FileNotFoundError:
         pass
 
 os.makedirs('saves', exist_ok=True)
-
 #--------------------------------------------
-import random
 
 # Essa função é capaz de importar elementos de outros arquivos .py (utilizada para o carregamento de saves)
 def importar_item(caminho, item):
@@ -118,7 +115,6 @@ def importar_item(caminho, item):
     return getattr(save, item)
 
 
-
 # Fase 1 é a primeira etapa do jogo, onde o jogador distribui seus barcos pelo tabuleiro
 def fase1():
 
@@ -127,7 +123,8 @@ def fase1():
 
     for jogador in range(2): # O código se repete para os dois jogadores
 
-        os.system('cls') # Limpando o terminal para começar a fase 1
+        #os.system('cls') # Limpando o terminal para começar a fase 1
+        print('funcao')
 
         # Quantidades de cada tipo de barco.
 
@@ -138,7 +135,8 @@ def fase1():
 
         while d2 + c3 + e4 + p5 != 0: # O turno do jogador roda até acabar os barcos
 
-            os.system('cls') 
+            #os.system('cls')
+            print('peca') 
 
             # Cabeçalho da fase
             #-----------------------------------------------------------------------------------
@@ -158,16 +156,18 @@ def fase1():
 
             while True: # Loop para corrigir possíveis erros de entrada
 
-                peca = input('\nSelecione um NAVIO [1, 2, 3 ou 4] e sua ORIENTAÇÃO [H ou V]...\n>').lower().replace(' ', '')
-                posicao = input('\nSelecione uma COORDENADA...\n>').lower().replace(' ', '')
+                peca = input('\nSelecione um NAVIO [1, 2, 3 ou 4] e sua ORIENTAÇÃO [H ou V]...\n>').upper().replace(' ', '')
+                posicao = input('\nSelecione uma COORDENADA...\n>').upper().replace(' ', '')
 
                 # Verificações da peça
                 if peca[1].isdigit():
                     peca = f'{peca[1]}{peca[0]}'
 
                 if len(peca) == 2:
-                    if 1 <= int(peca[0]) <= 4 and (peca[1] == 'h' or peca[1] == 'v'):
+                    if 1 <= int(peca[0]) <= 4 and (peca[1] == 'H' or peca[1] == 'V'):
                         verificacao_peca = True
+                    else:
+                        verificacao_peca = False
                 else:
                     verificacao_peca = False
                 
@@ -176,8 +176,10 @@ def fase1():
                     posicao = f'{posicao[1]}{posicao[0]}'
                 
                 if len(posicao) == 2:
-                    if 'A' <= posicao[0].upper() <= 'J' and 0 <= int(posicao[1]) <= 9:
+                    if 'A' <= posicao[0] <= 'J' and 0 <= int(posicao[1]) <= 9:
                         verificacao_posicao = True
+                    else:
+                        verificacao_peca = False
                 else:
                     verificacao_posicao = False
 
@@ -192,14 +194,14 @@ def fase1():
 
 
             # Coordenadas, peça e orientação de entrada
-            j = ord(posicao[0]) - 97
+            j = ord(posicao[0]) - 65
             i = int(posicao[1])
 
             barco = int(peca[0])
 
-            if peca[1] == 'h':
+            if peca[1] == 'H':
                 direcao = 1
-            elif peca[1] == 'v':
+            elif peca[1] == 'V':
                 direcao = 2
 
 
@@ -331,35 +333,34 @@ def fase1():
                                 p5 -= 1
                         
                         elif direcao == 2:
-                            if (tab_montado[i-2][j], tab_montado[i-1][j], tab_montado[i][j], tab_montado[i+1][j], tab_montado[i+2][j]) == (0,0,0,0):
+                            if (tab_montado[i-2][j], tab_montado[i-1][j], tab_montado[i][j], tab_montado[i+1][j], tab_montado[i+2][j]) == (0,0,0,0,0):
 
                                 tab_montado[i-2][j] = 1
                                 tab_montado[i-1][j] = 1
                                 tab_montado[i][j] = 2
                                 tab_montado[i+1][j] = 1
-                                tab_montado[i+2][j]
+                                tab_montado[i+2][j] = 1
                                 p5 -= 1
 
                         else:
                             print('\nO NAVIO não cabe na COORDENADA selecionada.\n')
                             input('Pressione qualquer tecla para inserir novas entradas... ')
-                        
-                        continue
+                            continue
 
                     except:
                         print('\nO NAVIO não cabe na COORDENADA selecionada.\n')
                         input('Pressione qualquer tecla para inserir novas entradas... ')
                         continue
 
-
+        print('antefinal')
         # Aqui o tabuleiro montado pelo jogador é adicionado à lista                     
         tabs_montados.append(tab_montado.copy())
         tab_montado = gerar_tabuleiro() # Resetando o tabuleiro para o próximo jogador montar
 
-        os.system('cls') # Limpando o terminal para o próximo jogador
+        print('final')
+        #os.system('cls') # Limpando o terminal para o próximo jogador
 
     return tabs_montados
-
 
 
 # Função usada para salvar um jogo no meio, usando os devidos parâmetros necessários
@@ -374,8 +375,78 @@ def salvar_jogo(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno):
     save.close()
 
 
-# A fase 2 é a segunda etapa do jogo, onde os jogadores tentam adivinhar onde o navio inimigo está
-def fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno):
+def ataque(jogador, tab, tab_de_jogo, turno):
+
+    turno_ = turno
+
+    print('')
+    print('=' * 50)
+    print(f'                    Jogador {jogador}\n')
+    print('=' * 50)
+    continuar = int(input('[1] ATACAR\n[2] SALVAR JOGO E SAIR\n> '))
+    print('=' * 50)
+
+    if continuar == 2:
+        raise ValueError
+
+    elif continuar == 1:
+
+        while turno_ == turno:
+
+            os.system('cls')
+
+            exibir_tab(montar_tab_chute(tab_de_jogo)) # Mostra o tabuleiro de chute
+
+            # Entrada das coordenadas e validação das mesmas
+            while True:
+
+                print('')
+                ij = input('Insira as coordenadas para o ataque:\n> ').upper()
+                print('')
+
+
+                if ij[0].isdigit():
+                    ij = f'{ij[1]}{ij[0]}'
+
+
+                if not(0 <= int(ij[1]) <= 9) or not('A' <= ij[0] <= 'J'):
+                        print('Entrada Inválida!')
+                        continue
+                else:
+                    break
+
+            # Coordenadas de entrada
+            j = ord(ij[0].lower()) - 97
+            i = int(ij[1])
+
+            # Condicionais para a verificação de acerto
+            if tab[i][j] == 0:
+                tab_de_jogo[i][j] = 0
+                exibir_tab(montar_tab_chute(tab_de_jogo))
+                print('=' * 50)
+                input('Errou! ')
+                turno_ += 1
+
+            elif tab[i][j] == 1:
+                tab_de_jogo[i][j] = 1
+                exibir_tab(montar_tab_chute(tab_de_jogo))
+                print('=' * 50)
+                input('Na mosca! Você acertou uma parte do navio inimigo! ')
+                tab[i][j] = -1
+
+            elif tab[i][j] == 2:
+                tab_de_jogo[i][j] = 2
+                exibir_tab(montar_tab_chute(tab_de_jogo))
+                print('=' * 50)
+                input('Em cheio! Você acertou bem no meio do navio inimigo! ')
+                tab[i][j] = -1
+
+
+        turno = turno_
+        return tab, tab_de_jogo, turno
+
+
+def fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno=1):
 
     os.system('cls') # Limpando o terminal para prosseguir para fase 2
 
@@ -383,134 +454,29 @@ def fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno):
     # Se o jogador acertar o barco, o turno não se altera pois ele joga novamente
 
     while True:
-        if turno % 2 == 1: # Jogador 1
 
-            os.system('cls') # Limpando o terminal
+        if turno % 2 == 1:
 
-            # Cabeçalho
-            print('')
-            print('=' * 50)
-            print(f'                    Jogador 1\n')
-            print('=' * 50)
-            continuar = int(input('[1] ATACAR\n[2] SALVAR JOGO E SAIR\n> '))
-            print('=' * 50)
+            try:
+                (tab1, tab_de_jogo2, turno) = ataque(1, tab1, tab_de_jogo2, turno)
+                # gera erro se o usuario escolher a opção de salvamento na função ataque()
 
-            # O jogador tem a opção de atacar (1) uma casa ou salvar o jogo (2)
+            except:
+                salvar_jogo(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno)
+                break 
 
-            match continuar:
-
-                case 1: # ATACAR
-
-                    exibir_tab(montar_tab_chute(tab_de_jogo2)) # Mostra o tabuleiro de chute
-
-                    # Entrada das coordenadas e validação das mesmas
-                    while True:
-                        print('')
-                        ij = input('Insira as coordenadas para o ataque:\n> ').upper()
-                        print('')
-                        if ij[0].isdigit():
-                            ij = f'{ij[1]}{ij[0]}'
-                        if not(0 <= int(ij[1]) <= 9) or not('A' <= ij[0] <= 'J'):
-                                print('Entrada Inválida!')
-                                continue
-                        else:
-                            break
-
-                    # Coordenadas de entrada
-                    j = ord(ij[0].lower()) - 97
-                    i = int(ij[1])
-
-                    # Condicionais para a verificação de acerto
-                    if tab2[i][j] == 0:
-                        tab_de_jogo2[i][j] = 0
-                        exibir_tab(montar_tab_chute(tab_de_jogo2))
-                        print('=' * 50)
-                        print('Errou!')
-                        print('=' * 50)
-                        input(' ')
-                        turno += 1
-                    elif tab2[i][j] == 1:
-                        tab_de_jogo2[i][j] = 1
-                        exibir_tab(montar_tab_chute(tab_de_jogo2))
-                        print('=' * 50)
-                        print('Na mosca! Você acertou uma parte do navio inimigo!')
-                        print('=' * 50)
-                        input(' ')
-                        tab2[i][j] = -1
-                    elif tab2[i][j] == 2:
-                        tab_de_jogo2[i][j] = 2
-                        exibir_tab(montar_tab_chute(tab_de_jogo2))
-                        print('=' * 50)
-                        print('Em cheio! Você acertou bem no meio do navio inimigo!')
-                        print('=' * 50)
-                        input(' ')
-                        tab2[i][j] = -1
-
-                case 2: #SALVAR E SAIR
-
-                    salvar_jogo(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno)
-                    break 
-
-
-        # Essa parte do código é equivalente a de cima, porém com o jogador 2
 
         elif turno % 2 == 0:
 
-            os.system('cls')
+            try:
+                (tab2, tab_de_jogo1, turno) = ataque(2, tab2, tab_de_jogo1, turno)
 
-            print('')
-            print('=' * 50)
-            print(f'                    Jogador 2\n')
-            print('=' * 50)
-            continuar = int(input('[1] ATACAR\n[2] SALVAR JOGO E SAIR\n> '))
-            print('=' * 50)
-            match continuar:
-                case 1:
-                    exibir_tab(montar_tab_chute(tab_de_jogo2))
-                    while True:
-                        print('')
-                        ij = input('Insira as coordenadas para o ataque:\n> ')
-                        print('')
-                        if ij[0].isdigit():
-                            ij = f'{ij[1]}{ij[0]}'
-                        if not (0 <= int(ij[1]) <= 9) or not ('A' <= ij[0] <= 'J'):
-                            print('Entrada Inválida!')
-                            continue
-                        else:
-                            break
-                    j = ord(ij[0].lower()) - 97
-                    i = int(ij[1])
-
-                    if tab1[i][j] == 0:
-                        tab_de_jogo1[i][j] = 0
-                        exibir_tab(montar_tab_chute(tab_de_jogo1))
-                        print('=' * 50)
-                        print('Errou!')
-                        print('=' * 50)
-                        input(' ')
-                        turno += 1
-                    elif tab1[i][j] == 1:
-                        tab_de_jogo1[i][j] = 1
-                        exibir_tab(montar_tab_chute(tab_de_jogo1))
-                        print('=' * 50)
-                        print('Na mosca! Você acertou uma parte do navio inimigo!')
-                        print('=' * 50)
-                        input(' ')
-                        tab1[i][j] = -1
-                    elif tab1[i][j] == 2:
-                        tab_de_jogo1[i][j] = 2
-                        exibir_tab(montar_tab_chute(tab_de_jogo1))
-                        print('=' * 50)
-                        print('Em cheio! Você acertou bem no meio do navio inimigo!')
-                        print('=' * 50)
-                        input(' ')
-                        tab1[i][j] = -1
-                case 2:
-                    salvar_jogo(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno)
-
-                    break
+            except:
+                salvar_jogo(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno)
+                break 
 
 
+        #---------------------------------------------------------------------------------------------------------------------
         # Essa parte é bem interessante:
         #   Basicamente, a cada turno, eu verifico se ainda há alguma parte de barco não destruida em ambos os tabuleiros.
 
@@ -653,9 +619,9 @@ def menu_login(nome):
 # Menu principal de entrada
 def main_menu():
 
-    os.system('cls') # Limpa o terminal a cada vez que o menu é acessado
-
     while True:
+
+        os.system('cls') # Limpa o terminal a cada vez que o menu é acessado
 
         # Cabeçalho do menu
         print('=' * 30)
@@ -669,8 +635,10 @@ def main_menu():
         match escolha:
 
             case 1:  # Fazer Login
+
                 nome = input('\nInsira o nome de usuário: ')
                 senha = input('Digite sua senha: ')
+
                 if login(nome,senha):
                     menu_login(nome)
                 else:
@@ -696,7 +664,6 @@ def main_menu():
                 break
     
     exit()
-
 
 
 
@@ -842,3 +809,6 @@ def ia_fase1():
 
 def ia_fase2():
     ...
+
+
+main_menu()

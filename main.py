@@ -416,7 +416,7 @@ def ataque(jogador, tab, tab_de_jogo, turno):
                     break
 
             # Coordenadas de entrada
-            j = ord(ij[0].lower()) - 97
+            j = ord(ij[0].lower()) - 65
             i = int(ij[1])
 
             # Condicionais para a verificação de acerto
@@ -440,6 +440,10 @@ def ataque(jogador, tab, tab_de_jogo, turno):
                 print('=' * 50)
                 input('Em cheio! Você acertou bem no meio do navio inimigo! ')
                 tab[i][j] = -1
+
+            elif tab[i][j] == -1:
+                print('=' * 50)
+                input('Você já atingiu essa parte do navio! ')
 
 
         turno = turno_
@@ -668,7 +672,7 @@ def main_menu():
 
 
 
-def ia_fase1():
+def mach_fase1():
 
     mach_tab = main_tab.copy()
 
@@ -807,7 +811,7 @@ def ia_fase1():
                 
     return mach_tab
 
-def ia_fase2():
+def mach_fase2():
     ...
 
 

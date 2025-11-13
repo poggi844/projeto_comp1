@@ -1,5 +1,5 @@
 import random
-from juncao import main_tab , montar_main_tab
+from main import main_tab , montar_main_tab
 
 
 def ia_fase1():

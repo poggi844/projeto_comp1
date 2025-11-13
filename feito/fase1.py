@@ -1,5 +1,5 @@
 import os
-from juncao import main_tab, montar_main_tab, gerar_tabuleiro
+from main import main_tab, montar_main_tab, gerar_tabuleiro
 
 def fase1():
 

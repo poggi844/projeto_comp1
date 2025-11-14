@@ -37,6 +37,7 @@ def montar_main_tab(tab):
     tab_ = []
     for linhas in range(10):
         linha = ' '.join([
+            '🏳️' if j == 3 else
             '🔵' if j == 0 else
             '⬜' if j == 1 else
             '🔳' if j == 2 else
@@ -64,7 +65,7 @@ def montar_tab_chute(tab):
     tab_ = []
     for linhas in range(10):
         linha = ' '.join([
-            '🏳️' if j == 0 else
+            '🏳️' if j == 3 else
             '🚩' if j == 1 else
             '🏴' if j == 2 else
             '⏺️' if j == -1 else
@@ -416,12 +417,13 @@ def ataque(jogador, tab, tab_de_jogo, turno):
                     break
 
             # Coordenadas de entrada
-            j = ord(ij[0].lower()) - 65
+            j = ord(ij[0]) - 65
             i = int(ij[1])
+
 
             # Condicionais para a verificação de acerto
             if tab[i][j] == 0:
-                tab_de_jogo[i][j] = 0
+                tab_de_jogo[i][j] = 3
                 exibir_tab(montar_tab_chute(tab_de_jogo))
                 print('=' * 50)
                 input('Errou! ')
@@ -441,9 +443,9 @@ def ataque(jogador, tab, tab_de_jogo, turno):
                 input('Em cheio! Você acertou bem no meio do navio inimigo! ')
                 tab[i][j] = -1
 
-            elif tab[i][j] == -1:
+            elif tab[i][j] in (-1,3):
                 print('=' * 50)
-                input('Você já atingiu essa parte do navio! ')
+                input('Você já atingiu essa coordenada! ')
 
 
         turno = turno_
@@ -462,7 +464,7 @@ def fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno=1):
         if turno % 2 == 1:
 
             try:
-                (tab1, tab_de_jogo2, turno) = ataque(1, tab1, tab_de_jogo2, turno)
+                (tab2, tab_de_jogo2, turno) = ataque(1, tab2, tab_de_jogo2, turno)
                 # gera erro se o usuario escolher a opção de salvamento na função ataque()
 
             except:
@@ -473,7 +475,7 @@ def fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno=1):
         elif turno % 2 == 0:
 
             try:
-                (tab2, tab_de_jogo1, turno) = ataque(2, tab2, tab_de_jogo1, turno)
+                (tab, tab_de_jogo1, turno) = ataque(2, tab1, tab_de_jogo1, turno)
 
             except:
                 salvar_jogo(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno)
@@ -815,4 +817,3 @@ def mach_fase2():
     ...
 
 
-main_menu()

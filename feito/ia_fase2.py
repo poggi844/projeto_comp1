@@ -12,25 +12,12 @@ def posicoes():
 lista_posicoes = posicoes()
 
 
-def ataque_mach(tab, turno, clean_list, coord_ataque=(-1,-1), last_correct=None):
+def ataque_mach(tab, turno, clean_list, coord_ataque=(-1,-1)):
 
     turno_ = turno
 
     while turno_ == turno:
 
-        # Entrada das coordenadas e validação das mesmas
-
-        if last_correct is not None:
-            ...
-
-
-
-
-
-
-
-
-            
             
         if coord_ataque == (-1,-1):
             index = clean_list.index(r.choice(clean_list))
@@ -44,10 +31,11 @@ def ataque_mach(tab, turno, clean_list, coord_ataque=(-1,-1), last_correct=None)
         if tab[i][j] == 0:
             tab[i][j] = 3
             clean_list.pop(index)
-            turno_ += 1
 
             montar_main_tab(tab)
             input('\nO inimigo errou!  ')
+
+            turno_ += 1
 
 
         elif tab[i][j] == 1:
@@ -87,13 +75,8 @@ def ataque_mach(tab, turno, clean_list, coord_ataque=(-1,-1), last_correct=None)
                 if (i+sentido, j) in clean_list:
                     ataque_mach(tab, turno, clean_list, (i+sentido, j))
                   
-
-        input('final')
         turno = turno_
         return tab, turno, clean_list
-
-
-#x = ataque_mach(tab1, turno, lista_posicoes, (5, 4))
 
 
 def mach_fase2(nome, tab1, tab2, tab_de_jogo2, turno=1):
@@ -109,7 +92,7 @@ def mach_fase2(nome, tab1, tab2, tab_de_jogo2, turno=1):
 
             try:
                 (tab2, tab_de_jogo2, turno) = ataque(1, tab2, tab_de_jogo2, turno)
-                # gera erro se o usuario escolher a opção de salvamento na função ataque()
+
 
             except:
                 salvar_jogo(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno)
@@ -119,10 +102,7 @@ def mach_fase2(nome, tab1, tab2, tab_de_jogo2, turno=1):
         elif turno % 2 == 0:
 
             (tab1, turno, clear_list) = ataque_mach(tab1, turno, clear_list)
-            print(clear_list)
             
-
-
 
         parametro1 = 0
         parametro2 = 0

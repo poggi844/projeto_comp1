@@ -114,7 +114,7 @@ tab_oculto = montar_tab_chute(tab_etapa2)
 
 # CARREGAMENTO DE JOGO
 from pathlib import Path
-import importlib.util, os, copy
+import importlib.util, os, copy, json
 import random as r
 
 
@@ -142,30 +142,109 @@ def importar_item(caminho, item):
     return getattr(save, item)
 
 
+def verificar_json(arquivo):
+    try:
+        with open(fr'{caminho}\{arquivo}', 'r'):
+            pass
+    except FileNotFoundError:
+        with open(fr'{caminho}\{arquivo}', 'a') as f:
+            f.write('{}')
+            pass
+
+
 # Função usada para salvar um jogo no meio, usando os devidos parâmetros necessários
 def salvar_jogo(nome, turno, tab1, tab2, tab_de_jogo1, tab_de_jogo2=0, clean_list=0):
 
-    # Salvando um jogo do modo Jogador x Máquina
-    if type(tab_de_jogo2) != list:
-        save_usuario = fr'{str(caminho)}\{nome}_m.py'
-        save = open(save_usuario, 'w')
-        save.write(f'tab1 = {tab1}\n'
-                f'tab2 = {tab2}\n'
-                f'tab_de_jogo = {tab_de_jogo1}\n'
-                f'clean_list = {clean_list}\n'
-                f'turno = {turno}')
-        save.close()
+    # Modo JxJ
+    if type(tab_de_jogo2) == list:
 
-    # Salvando um jogo do modo JxJ
+        verificar_json('jj_mode.json')
+        with open(fr'{caminho}\jj_mode.json', 'r') as jj_save:
+            dados = json.load(jj_save)
+
+        dados[nome] = {
+            'tab1': tab1,
+            'tab2': tab2,
+            'tab_de_jogo1': tab_de_jogo1,
+            'tab_de_jogo2': tab_de_jogo2,
+            'turno': turno
+        }
+
+        with open(fr'{caminho}\jj_mode.json', 'w') as jj_save:
+            json.dump(dados, jj_save)
+
+
+    # Modo Jogador x Máquina
     else:
-        save_usuario = fr'{str(caminho)}\{nome}.py'
-        save = open(save_usuario, 'w')
-        save.write(f'tab1 = {tab1}\n'
-               f'tab2 = {tab2}\n'
-               f'tab_de_jogo1 = {tab_de_jogo1}\n'
-               f'tab_de_jogo2 = {tab_de_jogo2}\n'
-               f'turno = {turno}')
-        save.close()
+        
+        verificar_json('jm_mode.json')
+        with open(fr'{caminho}\jm_mode.json', 'r') as jj_save:
+            dados = json.load(jj_save)
+
+        dados[nome] = {
+            'tab1': tab1,
+            'tab2': tab2,
+            'tab_de_jogo': tab_de_jogo1,
+            'clean_list': clean_list,
+            'turno': turno
+        }
+
+        with open(fr'{caminho}\jm_mode.json', 'w') as jj_save:
+            json.dump(dados, jj_save)
+
+
+# Importa os elementos necessários para a continuação do jogo salvo do arquivo .py correspondente de cada jogador.
+def carregar_jogo(nome, tipo):
+
+    if tipo == 2:
+        if Path(fr'{caminho}\jj_mode.json').exists():
+
+            with open(fr'{caminho}\jj_mode.json', 'r') as jj_save:
+                dados = json.load(jj_save)
+                
+            if nome in dados:
+                tab1 = dados[nome]['tab1']
+                tab2 = dados[nome]['tab2']
+                tab_de_jogo1 = dados[nome]['tab_de_jogo1']
+                tab_de_jogo2 = dados[nome]['tab_de_jogo2']
+                turno = dados[nome]['turno']
+                
+                fase2(tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno)
+
+            else:
+                print('\nNão há nenhum jogo salvo!')
+                input('\n\nPressione qualquer tecla para voltar ao MENU...\n')
+                os.system('cls')
+    
+        else:
+                print('\nNão há nenhum jogo salvo!')
+                input('\n\nPressione qualquer tecla para voltar ao MENU...\n')
+                os.system('cls')
+
+    else:
+        if Path(fr'{caminho}\jm_mode.json').exists():
+
+            with open(fr'{caminho}\jm_mode.json', 'r') as jm_save:
+                dados = json.load(jm_save)
+                
+            if nome in dados:
+                tab1 = dados[nome]['tab1']
+                tab2 = dados[nome]['tab2']
+                tab_de_jogo = dados[nome]['tab_de_jogo']
+                clean_list = dados[nome]['clean_list']
+                turno = dados[nome]['turno']
+                
+                mach_fase2(nome, tab1, tab2, tab_de_jogo, turno, clean_list)
+
+            else:
+                print('\nNão há nenhum jogo salvo!')
+                input('\n\nPressione qualquer tecla para voltar ao MENU...\n')
+                os.system('cls')
+
+        else:
+                print('\nNão há nenhum jogo salvo!')
+                input('\n\nPressione qualquer tecla para voltar ao MENU...\n')
+                os.system('cls')
 
 
 # Função usada para realizar o ataque
@@ -406,9 +485,9 @@ def fase1(jogador):
 
     # Quantidades de cada tipo de barco.
 
-    d2 = 1  # Destróier
-    c3 = 1  # Cruzador
-    e4 = 1  # Encouraçado
+    d2 = 0  # Destróier
+    c3 = 0  # Cruzador
+    e4 = 0  # Encouraçado
     p5 = 1  # Porta-aviões
 
     while d2 + c3 + e4 + p5 != 0: # O turno do jogador roda até acabar os barcos
@@ -724,35 +803,6 @@ def fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno=1):
             input('Sair...\n> ')
             j1 = 1
             break
-
-
-# Importa os elementos necessários para a continuação do jogo salvo do arquivo .py correspondente de cada jogador.
-def carregar_jogo(nome, tipo):
-
-    if tipo == 1:
-        if Path(fr'{str(caminho)}\{nome}_m.py').exists():
-            tab1 = importar_item(fr'{str(caminho)}\{nome}_m.py', 'tab1')
-            tab2 = importar_item(fr'{str(caminho)}\{nome}_m.py', 'tab2')
-            tab_de_jogo = importar_item(fr'{str(caminho)}\{nome}_m.py', 'tab_de_jogo')
-            turno = importar_item(fr'{str(caminho)}\{nome}_m.py', 'turno')
-            mach_fase2(nome, tab1, tab2, tab_de_jogo, turno)
-        else:
-            print('\nNão há nenhum jogo salvo!')
-            input('\n\nPressione qualquer tecla para voltar ao MENU...\n')
-            os.system('cls')
-
-    elif tipo == 2:
-        if Path(fr'{str(caminho)}\{nome}.py').exists():
-            tab1 = importar_item(fr'{str(caminho)}\{nome}.py', 'tab1')
-            tab2 = importar_item(fr'{str(caminho)}\{nome}.py', 'tab2')
-            tab_de_jogo1 = importar_item(fr'{str(caminho)}\{nome}.py', 'tab_de_jogo1')
-            tab_de_jogo2 = importar_item(fr'{str(caminho)}\{nome}.py', 'tab_de_jogo2')
-            turno = importar_item(fr'{str(caminho)}\{nome}.py', 'turno')
-            fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno)
-        else:
-            print('\nNão há nenhum jogo salvo!')
-            input('\n\nPressione qualquer tecla para voltar ao MENU...\n')
-            os.system('cls')
 
 
 # Algoritimo usado para montar uma distribuição de barcos de maneira automática

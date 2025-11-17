@@ -1,11 +1,13 @@
 # CONSTANTES GLOBAIS
 
+# Uma lista com todas as posições de um tabuleiro 10x10
 lista_posicoes = []
 for i in range(10):
     for j in range(10):
         lista_posicoes.append((i,j))
 
 
+# Tabuleiro em que o jogo vai se basear
 main_tab = []
 for i in range(10):
     linha = []
@@ -23,6 +25,7 @@ for i in range(10):
     tab_etapa2.append(linha)
 
 
+# Um tabuleiro de testes
 tabuleiro_cheio = []
 for i in range(10):
     linha = []
@@ -76,7 +79,7 @@ def montar_main_tab(tab):
             ])
         tab_.append(linha)
 
-    print('  A', '  B', ' C', ' D', ' E', '  F', ' G', ' H', ' I', ' J')
+    print('  A', '  B', ' C', ' D', ' E', ' F', ' G', ' H', ' I', ' J')
     for linhas in range(10):
         print(linhas,tab_[linhas])
 
@@ -142,6 +145,7 @@ def importar_item(caminho, item):
 # Função usada para salvar um jogo no meio, usando os devidos parâmetros necessários
 def salvar_jogo(nome, turno, tab1, tab2, tab_de_jogo1, tab_de_jogo2=0, clean_list=0):
 
+    # Salvando um jogo do modo Jogador x Máquina
     if type(tab_de_jogo2) != list:
         save_usuario = fr'{str(caminho)}\{nome}_m.py'
         save = open(save_usuario, 'w')
@@ -152,6 +156,7 @@ def salvar_jogo(nome, turno, tab1, tab2, tab_de_jogo1, tab_de_jogo2=0, clean_lis
                 f'turno = {turno}')
         save.close()
 
+    # Salvando um jogo do modo JxJ
     else:
         save_usuario = fr'{str(caminho)}\{nome}.py'
         save = open(save_usuario, 'w')
@@ -163,6 +168,7 @@ def salvar_jogo(nome, turno, tab1, tab2, tab_de_jogo1, tab_de_jogo2=0, clean_lis
         save.close()
 
 
+# Função usada para realizar o ataque
 def ataque(jogador, tab, tab_de_jogo, turno):
 
     os.system('cls')
@@ -173,7 +179,13 @@ def ataque(jogador, tab, tab_de_jogo, turno):
     print('=' * 50)
     print(f'                    Jogador {jogador}\n')
     print('=' * 50)
-    continuar = int(input('[1] ATACAR\n[2] SALVAR JOGO E SAIR\n> '))
+    while True:
+        try:
+            continuar = int(input('[1] ATACAR\n[2] SALVAR JOGO E SAIR\n> '))
+            break
+        except:
+            input('\nEntrada Inválida!')
+            continue
     print('=' * 50)
 
     if continuar == 2:
@@ -189,26 +201,32 @@ def ataque(jogador, tab, tab_de_jogo, turno):
 
             # Entrada das coordenadas e validação das mesmas
             while True:
-
-                print('')
-                ij = input('Insira as coordenadas para o ataque:\n> ').upper()
-                print('')
-
-
-                if ij[0].isdigit():
-                    ij = f'{ij[1]}{ij[0]}'
+                
+                try:
+                    print('')
+                    ij = input('Insira as coordenadas para o ataque:\n> ').upper()
+                    print('')
 
 
-                if len(ij) == 2:
+                    if ij[0].isdigit():
+                        ij = f'{ij[1]}{ij[0]}'
 
-                    if not(0 <= int(ij[1]) <= 9) or not('A' <= ij[0] <= 'J'):
-                            input('Entrada Inválida!')
-                            continue
+
+                    if len(ij) == 2:
+
+                        if not(0 <= int(ij[1]) <= 9) or not('A' <= ij[0] <= 'J'):
+                                input('Entrada Inválida!')
+                                continue
+                        else:
+                            break
+
                     else:
-                        break
+                        input('Entrada Inválida!')
+                        continue
 
-                else:
+                except:
                     input('Entrada Inválida!')
+                    continue
 
 
 
@@ -222,7 +240,6 @@ def ataque(jogador, tab, tab_de_jogo, turno):
                 tab_de_jogo[i][j] = 3
                 exibir_tab(montar_tab_chute(tab_de_jogo))
                 print('=' * 50)
-                print(tab[i][j])
                 input('Errou! ')
                 turno_ += 1
                 continue
@@ -250,15 +267,15 @@ def ataque(jogador, tab, tab_de_jogo, turno):
         return tab, tab_de_jogo, turno
     
 
+# Algoritimo para estabelecer um padrão de ataque no modo contra máquina
 def ataque_mach(tab, turno, clean_list, coord_ataque=(-1,-1)):
 
     turno_ = turno
 
     while turno_ == turno:
 
-        #os.system('cls')
-
-            
+        os.system('cls')
+ 
         if coord_ataque == (-1,-1):
             index = clean_list.index(r.choice(clean_list))
             (i,j) = clean_list[index]
@@ -285,7 +302,7 @@ def ataque_mach(tab, turno, clean_list, coord_ataque=(-1,-1)):
 
             montar_main_tab(tab)
             input('\nO inimigo atingiu um de seus barcos! ')
-        
+
             direcao = r.choice([1,2])
             sentido = r.choice([-1,1])
 
@@ -320,7 +337,8 @@ def ataque_mach(tab, turno, clean_list, coord_ataque=(-1,-1)):
                     else:
                         direcao = 1
                         continue
-            
+
+
             if falha:
                 (tab, turno_, clean_list) = ataque_mach(tab, turno, clean_list)
                 continue
@@ -367,7 +385,8 @@ def ataque_mach(tab, turno, clean_list, coord_ataque=(-1,-1)):
                     else:
                         direcao = 1
                         continue
-            
+
+
             if falha:
                 (tab, turno_, clean_list) = ataque_mach(tab, turno, clean_list)
                 continue
@@ -387,9 +406,9 @@ def fase1(jogador):
 
     # Quantidades de cada tipo de barco.
 
-    d2 = 0  # Destróier
-    c3 = 0  # Cruzador
-    e4 = 0  # Encouraçado
+    d2 = 1  # Destróier
+    c3 = 1  # Cruzador
+    e4 = 1  # Encouraçado
     p5 = 1  # Porta-aviões
 
     while d2 + c3 + e4 + p5 != 0: # O turno do jogador roda até acabar os barcos
@@ -415,38 +434,44 @@ def fase1(jogador):
 
         while True: # Loop para corrigir possíveis erros de entrada
 
-            peca = input('\nSelecione um NAVIO [1, 2, 3 ou 4] e sua ORIENTAÇÃO [H ou V]...\n>').upper().replace(' ', '')
-            posicao = input('\nSelecione uma COORDENADA...\n>').upper().replace(' ', '')
+            try:
+                peca = input('\nSelecione um NAVIO [1, 2, 3 ou 4] e sua ORIENTAÇÃO [H ou V]...\n>').upper().replace(' ', '')
+                posicao = input('\nSelecione uma COORDENADA...\n>').upper().replace(' ', '')
 
-            # Verificações da peça
-            if peca[1].isdigit():
-                peca = f'{peca[1]}{peca[0]}'
+                # Verificações da peça
+                if peca[1].isdigit():
+                    peca = f'{peca[1]}{peca[0]}'
 
-            if len(peca) == 2:
-                if 1 <= int(peca[0]) <= 4 and (peca[1] == 'H' or peca[1] == 'V'):
-                    verificacao_peca = True
+                if len(peca) == 2:
+                    if 1 <= int(peca[0]) <= 4 and (peca[1] == 'H' or peca[1] == 'V'):
+                        verificacao_peca = True
+                    else:
+                        verificacao_peca = False
                 else:
                     verificacao_peca = False
-            else:
-                verificacao_peca = False
-            
-            # Verificações da posição
-            if posicao[0].isdigit():
-                posicao = f'{posicao[1]}{posicao[0]}'
-            
-            if len(posicao) == 2:
-                if 'A' <= posicao[0] <= 'J' and 0 <= int(posicao[1]) <= 9:
-                    verificacao_posicao = True
+                
+                # Verificações da posição   
+                if posicao[0].isdigit():
+                    posicao = f'{posicao[1]}{posicao[0]}'
+                
+                if len(posicao) == 2:
+                    if 'A' <= posicao[0] <= 'J' and 0 <= int(posicao[1]) <= 9:
+                        verificacao_posicao = True
+                    else:
+                        verificacao_posicao = False
                 else:
-                    verificacao_peca = False
-            else:
-                verificacao_posicao = False
-
+                    verificacao_posicao = False
             
-            # Validação de entradas
-            if verificacao_peca and verificacao_posicao:
-                break
-            else:
+            
+                # Validação de entradas
+                if verificacao_peca and verificacao_posicao:
+                    break
+                else:
+                    print('\nEntrada(s) inválida(s)! Se atente a forma devida.\n')
+                    input('Pressione qualquer tecla para inserir novas entradas... ')
+                    continue
+
+            except:
                 print('\nEntrada(s) inválida(s)! Se atente a forma devida.\n')
                 input('Pressione qualquer tecla para inserir novas entradas... ')
                 continue
@@ -558,7 +583,7 @@ def fase1(jogador):
                             tab_montado[i-1][j] = 1
                             tab_montado[i][j] = 2
                             tab_montado[i+1][j] = 1
-                            tab_montado[i+2][j]
+                            tab_montado[i+2][j] = 1
                             e4 -= 1
 
                     else:
@@ -615,6 +640,7 @@ def fase1(jogador):
     return tab_montado
 
 
+# Fase 2 é onde os jogadores irão adivinhas onde estam os barcos do opontente
 def fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno=1):
 
     os.system('cls') # Limpando o terminal para prosseguir para fase 2
@@ -729,6 +755,7 @@ def carregar_jogo(nome, tipo):
             os.system('cls')
 
 
+# Algoritimo usado para montar uma distribuição de barcos de maneira automática
 def mach_fase1():
 
     mach_tab = copy.deepcopy(main_tab)
@@ -870,6 +897,7 @@ def mach_fase1():
     return mach_tab
 
 
+# É a base do modo contra máquina
 def mach_fase2(nome, tab1, tab2, tab_de_jogo, turno=1, clean_list=lista_posicoes):
 
     os.system('cls')
@@ -947,11 +975,10 @@ def JvsJ(nome):
     menu_login(nome)
 
 
+# Essa função é utilizada para criar um novo jogo, no modo JxMáquina
 def JvsMACH(nome):
-    tab1 = tabuleiro_cheio
+    tab1 = fase1(1)
     tab2 = mach_fase1()
-    montar_main_tab(tab2)
-    input('')
     mach_fase2(nome, tab1, tab2, copy.deepcopy(tab_etapa2))
     menu_login(nome)
 
@@ -981,7 +1008,11 @@ def menu_login(nome):
         print('=' * 30)
         print('1 - Novo Jogo\n2 - Carregar Jogo\n3 - Logout')
         print('=' * 30)
-        escolha = int(input('> '))
+        try:
+            escolha = int(input('> '))
+        except:
+            input('\nEntrada Inválida!')
+            continue
 
         if escolha in (1,2):  # Novo Jogo
 
@@ -994,7 +1025,11 @@ def menu_login(nome):
                 print('=' * 30)
                 print('1 - Jogador vs. Máquina\n2 - Jogador vs. Jogador\n3 - Voltar')
                 print('=' * 30)
-                escolha_ = int(input('> '))
+                try:
+                    escolha_ = int(input('> '))
+                except:
+                    input('\nEntrada Inválida!')
+                    continue
 
                 if escolha == 1:
 
@@ -1040,8 +1075,14 @@ def main_menu():
         match escolha:
 
             case 1:  # Fazer Login
-                nome = input('\nInsira o nome de usuário: ')
-                senha = input('Digite sua senha: ')
+                while True:
+                    try:
+                        nome = input('\nInsira o nome de usuário: ')
+                        senha = input('Digite sua senha: ')
+                        break
+                    except:
+                        input('\nEntrada Inválida!')
+                        continue
 
                 if login(nome,senha):
                     menu_login(nome)

@@ -101,7 +101,7 @@ def montar_tab_chute(tab):
 
 #Exibe o tabuleiro final com um cabeçalho
 def exibir_tab(tab):
-    print('  A', '  B', ' C', ' D', ' E', '  F', ' G', ' H', ' I', ' J')
+    print('   A', ' B', ' C', ' D', ' E', ' F', ' G', ' H', ' I', ' J')
     for linhas in range(10):
         print(linhas, tab[linhas])
 
@@ -153,7 +153,7 @@ def verificar_json(arquivo):
 
 
 # Função usada para salvar um jogo no meio, usando os devidos parâmetros necessários
-def salvar_jogo(nome, turno, tab1, tab2, tab_de_jogo1, tab_de_jogo2=0, clean_list=0):
+def salvar_jogo(nome, turno, tab1, tab2, tab_de_jogo1, tab_de_jogo2=0, clean_list=0, fim=False):
 
     # Modo JxJ
     if type(tab_de_jogo2) == list:
@@ -167,7 +167,8 @@ def salvar_jogo(nome, turno, tab1, tab2, tab_de_jogo1, tab_de_jogo2=0, clean_lis
             'tab2': tab2,
             'tab_de_jogo1': tab_de_jogo1,
             'tab_de_jogo2': tab_de_jogo2,
-            'turno': turno
+            'turno': turno,
+            'fim': fim
         }
 
         with open(fr'{caminho}\jj_mode.json', 'w') as jj_save:
@@ -186,11 +187,23 @@ def salvar_jogo(nome, turno, tab1, tab2, tab_de_jogo1, tab_de_jogo2=0, clean_lis
             'tab2': tab2,
             'tab_de_jogo': tab_de_jogo1,
             'clean_list': clean_list,
-            'turno': turno
+            'turno': turno,
+            'fim': fim
         }
 
         with open(fr'{caminho}\jm_mode.json', 'w') as jj_save:
             json.dump(dados, jj_save)
+
+
+# Corrige a formatação do json
+def listas_para_tuplas(obj, externo=True):
+    if isinstance(obj, list):
+        if externo:
+            return [listas_para_tuplas(x, externo=False) for x in obj]
+        else:
+            return tuple(listas_para_tuplas(x, externo=False) for x in obj)
+    else:
+        return obj
 
 
 # Importa os elementos necessários para a continuação do jogo salvo do arquivo .py correspondente de cada jogador.
@@ -208,6 +221,9 @@ def carregar_jogo(nome, tipo):
                 tab_de_jogo1 = dados[nome]['tab_de_jogo1']
                 tab_de_jogo2 = dados[nome]['tab_de_jogo2']
                 turno = dados[nome]['turno']
+                
+                if dados[nome]['fim']:
+                    raise ValueError
                 
                 fase2(tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno)
 
@@ -231,8 +247,11 @@ def carregar_jogo(nome, tipo):
                 tab1 = dados[nome]['tab1']
                 tab2 = dados[nome]['tab2']
                 tab_de_jogo = dados[nome]['tab_de_jogo']
-                clean_list = dados[nome]['clean_list']
+                clean_list = listas_para_tuplas(dados[nome]['clean_list'])
                 turno = dados[nome]['turno']
+
+                if dados[nome]['fim']:
+                    raise ValueError
                 
                 mach_fase2(nome, tab1, tab2, tab_de_jogo, turno, clean_list)
 
@@ -242,9 +261,9 @@ def carregar_jogo(nome, tipo):
                 os.system('cls')
 
         else:
-                print('\nNão há nenhum jogo salvo!')
-                input('\n\nPressione qualquer tecla para voltar ao MENU...\n')
-                os.system('cls')
+            print('\nNão há nenhum jogo salvo!')
+            input('\n\nPressione qualquer tecla para voltar ao MENU...\n')
+            os.system('cls')
 
 
 # Função usada para realizar o ataque
@@ -261,6 +280,9 @@ def ataque(jogador, tab, tab_de_jogo, turno):
     while True:
         try:
             continuar = int(input('[1] ATACAR\n[2] SALVAR JOGO E SAIR\n> '))
+            if continuar not in (1, 2):
+                input('\nOpção Inválida! ')
+                continue
             break
         except:
             input('\nEntrada Inválida!')
@@ -320,6 +342,7 @@ def ataque(jogador, tab, tab_de_jogo, turno):
                 exibir_tab(montar_tab_chute(tab_de_jogo))
                 print('=' * 50)
                 input('Errou! ')
+                tab[i][j] = 3
                 turno_ += 1
                 continue
 
@@ -407,10 +430,12 @@ def ataque_mach(tab, turno, clean_list, coord_ataque=(-1,-1)):
                 if direcao == 2:
                     if (i+sentido, j) in clean_list:
                         (tab, turno_, clean_list) = ataque_mach(tab, turno, clean_list, (i+sentido, j))
+                        falha = False
                         break
 
                     elif (i-sentido, j) in clean_list:
                         (tab, turno_, clean_list) = ataque_mach(tab, turno, clean_list, (i-sentido, j))
+                        falha = False
                         break
 
                     else:
@@ -419,6 +444,7 @@ def ataque_mach(tab, turno, clean_list, coord_ataque=(-1,-1)):
 
 
             if falha:
+                input(f'falha1: {falha}' )
                 (tab, turno_, clean_list) = ataque_mach(tab, turno, clean_list)
                 continue
 
@@ -437,7 +463,7 @@ def ataque_mach(tab, turno, clean_list, coord_ataque=(-1,-1)):
 
                 falha = True
 
-                if direcao == 1:
+                if direcao == 1:                   
                     if (i, j+sentido) in clean_list:
                         (tab, turno_, clean_list) = ataque_mach(tab, turno, clean_list, (i,j+sentido))
                         falha = False
@@ -455,10 +481,12 @@ def ataque_mach(tab, turno, clean_list, coord_ataque=(-1,-1)):
                 if direcao == 2:
                     if (i+sentido, j) in clean_list:
                         (tab, turno_, clean_list) = ataque_mach(tab, turno, clean_list, (i+sentido, j))
+                        falha = False
                         break
 
                     elif (i-sentido, j) in clean_list:
                         (tab, turno_, clean_list) = ataque_mach(tab, turno, clean_list, (i-sentido, j))
+                        falha = False
                         break
 
                     else:
@@ -485,9 +513,9 @@ def fase1(jogador):
 
     # Quantidades de cada tipo de barco.
 
-    d2 = 0  # Destróier
-    c3 = 0  # Cruzador
-    e4 = 0  # Encouraçado
+    d2 = 4  # Destróier
+    c3 = 3  # Cruzador
+    e4 = 2  # Encouraçado
     p5 = 1  # Porta-aviões
 
     while d2 + c3 + e4 + p5 != 0: # O turno do jogador roda até acabar os barcos
@@ -783,8 +811,9 @@ def fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno=1):
             print('Tabuleiro do Jogador 2🥇\n')
             montar_main_tab(tab2)
             print(' \n' * 2)
-            input('Sair...\n> ')
-            j2 = 1
+            input('Sair...')
+            fim = True
+            salvar_jogo(nome, turno, tab1, tab2, tab_de_jogo, clean_list=clean_list, fim=fim)
             break
 
         # Indica que o Jogador 1 venceu
@@ -800,8 +829,9 @@ def fase2(nome, tab1, tab2, tab_de_jogo1, tab_de_jogo2, turno=1):
             print('Tabuleiro do Jogador 2🥈\n')
             montar_main_tab(tab2)
             print(' \n' * 2)
-            input('Sair...\n> ')
-            j1 = 1
+            input('Sair...')
+            fim = True
+            salvar_jogo(nome, turno, tab1, tab2, tab_de_jogo, clean_list=clean_list, fim=fim)
             break
 
 
@@ -853,7 +883,6 @@ def mach_fase1():
                     j = r.randint(0,9)
 
 
-        #print(barco, direcao, i, j)
         match barco:
             case 2:
                 if d2 == 0:
@@ -971,19 +1000,20 @@ def mach_fase2(nome, tab1, tab2, tab_de_jogo, turno=1, clean_list=lista_posicoes
             (tab1, turno, clean_list) = ataque_mach(tab1, turno, clean_list)
             
 
-        parametro1 = 0
-        parametro2 = 0
+        parametro1 = True
+        parametro2 = True
 
         for i in range(10):
             for j in range(10):
                 if tab1[i][j] == 1 or tab1[i][j] == 2:
-                    parametro1 = 1
+                    parametro1 = False
 
                 if tab2[i][j] == 1 or tab2[i][j] == 2:
-                    parametro2 = 1
+                    parametro2 = False
 
         # Indica que o Jogador 2 venceu
-        if parametro1 != 1:
+        if parametro1:
+            os.system('cls')
             print('=' * 50)
             print('           🏆 O JOGADOR 2 VENCEU!!! 🏆\n')
             print('                   Jogador 2 🥇')
@@ -995,12 +1025,14 @@ def mach_fase2(nome, tab1, tab2, tab_de_jogo, turno=1, clean_list=lista_posicoes
             print('Tabuleiro do Jogador 2🥇\n')
             montar_main_tab(tab2)
             print(' \n' * 2)
-            input('Sair...\n> ')
-            j2 = 1
+            input('Sair... ')
+            fim = True
+            salvar_jogo(nome, turno, tab1, tab2, tab_de_jogo, clean_list=clean_list, fim=fim)
             break
 
         # Indica que o Jogador 1 venceu
-        if parametro2 != 1:
+        if parametro2:
+            os.system('cls')
             print('=' * 50)
             print('           🏆 O JOGADOR 1 VENCEU!!! 🏆\n')
             print('                   Jogador 1 🥇')
@@ -1012,10 +1044,12 @@ def mach_fase2(nome, tab1, tab2, tab_de_jogo, turno=1, clean_list=lista_posicoes
             print('Tabuleiro do Jogador 2🥈\n')
             montar_main_tab(tab2)
             print(' \n' * 2)
-            input('Sair...\n> ')
-            j1 = 1
+            input('Sair... ')
+            fim = True
+            salvar_jogo(nome, turno, tab1, tab2, tab_de_jogo, clean_list=clean_list, fim=fim)
             break
 
+        
 
 # Essa função é utilizada para criar um novo jogo, no modo JxJ
 def JvsJ(nome):
@@ -1031,6 +1065,14 @@ def JvsMACH(nome):
     tab2 = mach_fase1()
     mach_fase2(nome, tab1, tab2, copy.deepcopy(tab_etapa2))
     menu_login(nome)
+
+
+def teste(nome):
+    tab1 = mach_fase1()
+    tab2 = mach_fase1()
+    mach_fase2(nome, tab1, tab2, copy.deepcopy(tab_etapa2))
+    menu_login(nome)
+   
 
 #_____________________________________________________________________________________________________________
 
@@ -1060,6 +1102,9 @@ def menu_login(nome):
         print('=' * 30)
         try:
             escolha = int(input('> '))
+            if escolha not in (1, 2, 3):
+                input('\nOpção Inválida! ')
+                continue
         except:
             input('\nEntrada Inválida!')
             continue
@@ -1076,7 +1121,12 @@ def menu_login(nome):
                 print('1 - Jogador vs. Máquina\n2 - Jogador vs. Jogador\n3 - Voltar')
                 print('=' * 30)
                 try:
-                    escolha_ = int(input('> '))
+                    while True:
+                        escolha_ = int(input('> '))
+                        if escolha not in (1, 2, 3):
+                            input('\nOpção Inválida! ')
+                            continue                   
+                        break      
                 except:
                     input('\nEntrada Inválida!')
                     continue
@@ -1093,7 +1143,11 @@ def menu_login(nome):
                             continue
 
                 elif escolha == 2:
-                    carregar_jogo(nome, escolha_)
+                    try:
+                        carregar_jogo(nome, escolha_)
+                    except:
+                        input('\nEste jogo já terminou.')
+                        continue
 
 
         elif escolha == 3:  # Voltar ao menu principal
@@ -1116,6 +1170,9 @@ def main_menu():
         print('=' * 30)
         try:
             escolha = int(input('> '))
+            if escolha not in (1, 2, 3, 4, 32):
+                input('\nOpção Inválida! ')
+                continue
         except:
             input('\nEntrada Inválida!')
             continue
@@ -1131,7 +1188,7 @@ def main_menu():
                         senha = input('Digite sua senha: ')
                         break
                     except:
-                        input('\nEntrada Inválida!')
+                        input('\nEntrada Inválida! ')
                         continue
 
                 if login(nome,senha):
@@ -1159,6 +1216,9 @@ def main_menu():
                 os.system('cls')
             case 4:
                 break
+
+            case 32:
+                teste('teste0')
     
     exit()
 
